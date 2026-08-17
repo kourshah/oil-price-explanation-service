@@ -4,19 +4,22 @@ explain.py — LLM-based plain-language explanation layer.
 Standalone module: does not depend on the original oil-price-prediction
 repo. It only needs a predicted price, a current price, and a small
 dict of feature values (obtained by calling the existing live API).
+
+Uses Google's Gemini API (free tier) instead of a paid API — no credit
+card required. Get a key at https://aistudio.google.com/api-keys
 """
 
 import os
 import json
-from anthropic import Anthropic
+from google import genai
 
 _client = None
 
 
-def _get_client() -> Anthropic:
+def _get_client() -> genai.Client:
     global _client
     if _client is None:
-        _client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+        _client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
     return _client
 
 
@@ -51,13 +54,12 @@ Respond with ONLY valid JSON, no other text, in exactly this shape:
   "confidence_note": "1 sentence noting this is a model estimate, not financial advice"
 }}"""
 
-        response = _get_client().messages.create(
-            model="claude-sonnet-4-6",
-            max_tokens=300,
-            messages=[{"role": "user", "content": prompt}]
+        response = _get_client().models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt,
         )
 
-        raw_text = response.content[0].text.strip()
+        raw_text = response.text.strip()
         raw_text = raw_text.replace("```json", "").replace("```", "").strip()
 
         parsed = json.loads(raw_text)
