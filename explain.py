@@ -70,5 +70,8 @@ Respond with ONLY valid JSON, no other text, in exactly this shape:
 
         return parsed
 
-    except Exception:
+    except Exception as exc:
+        # Temporary debug logging — shows the real error in Render's logs.
+        # Safe to remove once everything works.
+        print(f"[explain_prediction] FAILED: {type(exc).__name__}: {exc}")
         return fallback

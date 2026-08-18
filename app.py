@@ -62,7 +62,7 @@ def explain():
     independently, then generates a plain-language explanation.
     """
     try:
-        resp = requests.get(PREDICTION_API_URL, timeout=60)
+        resp = requests.get(PREDICTION_API_URL, timeout=120)
         resp.raise_for_status()
         payload = resp.json()
     except Exception as exc:
